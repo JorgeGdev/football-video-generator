@@ -150,6 +150,49 @@
         </div>
       </div>
 
+      <!-- NUEVA SECCIÓN: Gestión de Videos -->
+      <div class="card">
+        <h3>📥 Gestión de Videos</h3>
+        <div class="video-management">
+          <div class="video-stats">
+            <span
+              >📊 Videos disponibles: <strong id="videoCount">0</strong></span
+            >
+            <button
+              class="btn clear-btn"
+              onclick="cargarListaVideos()"
+              style="margin-left: 15px"
+            >
+              🔄 Actualizar Lista
+            </button>
+          </div>
+
+          <!-- Lista de videos -->
+          <div class="video-list" id="videoList">
+            <div class="video-item loading">📁 Cargando videos...</div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="video-actions">
+            <button
+              class="btn"
+              onclick="descargarUltimoVideo()"
+              id="downloadLatestBtn"
+              disabled
+            >
+              📥 Descargar Último Video
+            </button>
+            <button
+              class="btn danger"
+              onclick="limpiarVideosAntiguos()"
+              id="cleanOldBtn"
+            >
+              🗑️ Limpiar Videos Antiguos (7+ días)
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="log-container">
         <h3 style="margin-bottom: 15px">
           📋 Logs del Sistema

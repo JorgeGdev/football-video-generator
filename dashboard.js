@@ -316,9 +316,13 @@ window.onload = function () {
   verificarAuth(); // Verificar autenticación primero
   conectarLogs();
   actualizarEstadisticas();
+  cargarListaVideos(); // NUEVA LÍNEA - Cargar videos al inicio
 
   // Actualizar estadísticas cada 5 segundos
   setInterval(actualizarEstadisticas, 5000);
+  
+  // Actualizar lista de videos cada 30 segundos
+  setInterval(cargarListaVideos, 30000); // NUEVA LÍNEA
 };
 
 // Limpiar conexiones al cerrar
@@ -327,3 +331,119 @@ window.onbeforeunload = function () {
     eventSource.close();
   }
 };
+
+// ===== GESTIÓN DE VIDEOS =====
+
+// Variables globales para videos
+let videosDisponibles = [];
+
+// Cargar lista de videos
+async function cargarListaVideos() {
+  try {
+    const response = await fetch('/api/videos/list', {
+      credentials: 'include'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      videosDisponibles = result.videos;
+      mostrarListaVideos(result.videos);
+      actualizarContadorVideos(result.total);
+      
+      // Habilitar/deshabilitar botones
+      const downloadBtn = document.getElementById('downloadLatestBtn');
+      downloadBtn.disabled = result.videos.length === 0;
+    } else {
+      mostrarErrorVideos('Error cargando videos: ' + result.message);
+    }
+    
+  } catch (error) {
+    mostrarErrorVideos('Error conectando con el servidor');
+  }
+}
+
+// Mostrar lista de videos en el HTML
+function mostrarListaVideos(videos) {
+  const videoList = document.getElementById('videoList');
+  
+  if (videos.length === 0) {
+    videoList.innerHTML = `
+      <div class="video-item loading">
+        📭 No hay videos disponibles
+      </div>
+    `;
+    return;
+  }
+  
+  videoList.innerHTML = videos.map(video => `
+    <div class="video-item">
+      <div class="video-info">
+        <div class="video-name">🎬 ${video.nombre}</div>
+        <div class="video-details">
+          📅 ${video.fecha} ⏰ ${video.hora} 📏 ${video.tamaño}
+        </div>
+      </div>
+      <button class="video-download-btn" onclick="descargarVideo('${video.nombre}')">
+        📥 Descargar
+      </button>
+    </div>
+  `).join('');
+}
+
+// Actualizar contador de videos
+function actualizarContadorVideos(total) {
+  document.getElementById('videoCount').textContent = total;
+}
+
+// Mostrar error en la lista
+function mostrarErrorVideos(mensaje) {
+  const videoList = document.getElementById('videoList');
+  videoList.innerHTML = `
+    <div class="video-item loading" style="color: #ff6b6b;">
+      ❌ ${mensaje}
+    </div>
+  `;
+}
+
+// Descargar video específico
+async function descargarVideo(nombreVideo) {
+  try {
+    // Crear elemento de descarga
+    const link = document.createElement('a');
+    link.href = `/api/videos/download/${encodeURIComponent(nombreVideo)}`;
+    link.download = nombreVideo;
+    
+    // Simular clic para iniciar descarga
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Log de éxito
+    console.log(`📥 Descargando video: ${nombreVideo}`);
+    
+  } catch (error) {
+    alert('Error descargando video: ' + error.message);
+  }
+}
+
+// Descargar último video (el más reciente)
+function descargarUltimoVideo() {
+  if (videosDisponibles.length === 0) {
+    alert('No hay videos disponibles para descargar');
+    return;
+  }
+  
+  const ultimoVideo = videosDisponibles[0]; // El primero es el más reciente
+  descargarVideo(ultimoVideo.nombre);
+}
+
+// Limpiar videos antiguos (función placeholder por ahora)
+async function limpiarVideosAntiguos() {
+  const confirmacion = confirm('¿Estás seguro de que quieres eliminar videos mayores a 7 días?');
+  
+  if (confirmacion) {
+    alert('Función de limpieza automática será implementada próximamente');
+    // TODO: Implementar endpoint de limpieza
+  }
+}

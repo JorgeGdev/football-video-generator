@@ -33,30 +33,33 @@ async function consultarRAG(consulta) {
 
     let documentosEncontrados = [];
 
+    // Priorizar equipos y jugadores TOP
+    const equiposTop = ['barcelona', 'madrid', 'manchester', 'liverpool', 'city', 'chelsea', 'arsenal', 'tottenham', 'psg', 'milan', 'inter', 'juventus', 'napoli', 'bayern', 'dortmund'];
+    const jugadoresTop = ['mbappe', 'haaland', 'vinicius', 'bellingham', 'pedri', 'gavi', 'lautaro', 'dembele', 'messi', 'cristiano', 'benzema'];
+
+    // Buscar primero por equipos y jugadores TOP
     for (const palabra of palabrasClave.slice(0, 3)) {
+      let prioridad = equiposTop.some(equipo => palabra.includes(equipo)) || 
+                     jugadoresTop.some(jugador => palabra.includes(jugador));
+
       const { data, error } = await supabase
         .from('documents')
         .select('content, metadata')
         .or(`content.ilike.%${palabra}%,metadata->>title.ilike.%${palabra}%`)
-        .limit(5);
+        .limit(prioridad ? 8 : 5);
 
       if (!error && data && data.length > 0) {
         documentosEncontrados.push(...data);
-        console.log(`📄 [RAG] Encontrados ${data.length} docs para "${palabra}"`);
+        console.log(`📄 [RAG] Encontrados ${data.length} docs para "${palabra}" ${prioridad ? '(TOP PRIORITY)' : ''}`);
       }
     }
 
-    // Eliminar duplicados
+    // Eliminar duplicados y priorizar contenido TOP
     const documentosUnicos = documentosEncontrados.filter((doc, index, self) => 
       index === self.findIndex(d => d.content === doc.content)
     ).slice(0, 5);
 
     console.log(`✅ [RAG] Total: ${documentosUnicos.length} documentos únicos encontrados`);
-
-    if (documentosUnicos.length > 0) {
-      const mejorDoc = documentosUnicos[0];
-      console.log(`🏆 [RAG] Mejor match: "${mejorDoc.metadata?.title}" (${mejorDoc.metadata?.pais})`);
-    }
 
     return documentosUnicos;
 
@@ -66,7 +69,7 @@ async function consultarRAG(consulta) {
   }
 }
 
-// Función para generar script con IA REAL + RAG
+// Función para generar script con IA REAL + RAG OPTIMIZADA
 async function generarScript(consulta, sessionId) {
   try {
     console.log(`🤖 [${sessionId}] Iniciando generación con IA + RAG`);
@@ -94,75 +97,83 @@ CONTENIDO: ${doc.content}
 ---`;
     }).join('\n\n');
 
-    // PASO 3: Prompt optimizado (más corto para ahorrar tokens)
-    const promptOptimizado = `Eres presentadora deportiva. Crea script de 50-55 palabras EXACTAS para síntesis de voz.
+    // PASO 3: Prompt EXACTO del original optimizado
+    const promptOriginalOptimizado = `Eres una presentadora de noticias deportivas muy alegre especializada en crear scripts de audio dirigidos al público amante del futbol y de los equipos de los paises top. Tu misión es transformar noticias en narrativas habladas optimizadas para síntesis de voz de EXACTAMENTE 75-80 palabras que duren MÁXIMO 20 segundos.
 
-ESTRUCTURA OBLIGATORIA (75-80 palabras total):
+🌎 ENFOQUE EN FUTBOL EQUIPOS TOP PRIORITARIO:
+• Destaca equipos top de las ligas de España, Francia, Italia e Inglaterra (Premier League, Serie A, Ligue 1 y La liga.)
+• Menciona conexiones latinas en ligas internacionales (latinos en Europa, MLS, etc.)
+• Usa referencias a jugadores Top Mundial (Mbappe, CR7, Viny jr, Haaland, Dembele, Lautaro Martinez)
+
+🎯 ESTRUCTURA OBLIGATORIA (75-80 palabras total):
 🎣 HOOK (0-3 segundos): 15-20 palabras
-Impacto inmediato con exclamación
-✓ Menciona protagonista principal
-✓ Genera expectativa máxima
-✓ Usa palabras de alto impacto: ¡INCREÍBLE!, ¡BOMBAZO!, ¡HISTÓRICO!
-📰 CORE (3-16 segundos): 45-55 palabras
-✓ Historia completa en narrativa fluida y cronológica
-✓ Detalles específicos OBLIGATORIOS: marcadores exactos, tiempos precisos, equipos completos
-✓ Palabras simples pero dinámicas
-✓ JAMÁS omitir información clave de la base de datos
-💬 CTA (16-20 segundos): 10-15 palabras
-✓ Pregunta directa que invite al engagement
-✓ Emoji temático relacionado
-✓ Tono conversacional y amigable
-🔥 EJEMPLOS MEJORADOS:
-EJEMPLO 1 - Gol Espectacular (Enfoque Latino):
-"¡INCREÍBLE! El colombiano Díaz acaba de anotar el gol más espectacular del año"
-"El cafetero sorprendió con un tiro libre desde 35 metros directo al ángulo superior en Anfield. Este golazo empata para Liverpool y mantiene vivas las esperanzas de la hinchada latina en Europa."
-"¿El mejor gol de un colombiano en Europa? Comenta tu opinión"
+• Impacto inmediato con exclamación
+• Menciona protagonista principal
+• Genera expectativa máxima
+• Usa palabras de alto impacto: ¡INCREÍBLE!, ¡BOMBAZO!, ¡HISTÓRICO!
 
-EJEMPLO 2 - Fichaje Latino:
-"¡BOMBAZO! El crack argentino Álvarez ficha por el Manchester City"
-"El delantero de River firmó por cinco años tras pagar 20 millones. El pibe se une a su compatriota Messi como referente albiceleste en Europa. Guardiola confirmó que será titular desde enero."
-"¿Será el próximo crack argentino en triunfar? Danos tu predicción"
+📰 CORE (3-16 segundos): 45-55 palabras
+• Historia completa en narrativa fluida y cronológica
+• Detalles específicos OBLIGATORIOS: marcadores exactos, tiempos precisos, equipos completos
+• Palabras simples pero dinámicas
+• JAMÁS omitir información clave de la base de datos
+
+💬 CTA (16-20 segundos): 10-15 palabras
+• Pregunta directa que invite al engagement
+• Emoji temático relacionado
+• Tono conversacional y amigable
+
+🔥 EJEMPLOS DE REFERENCIA:
+"¡INCREÍBLE! El colombiano Díaz acaba de anotar el gol más espectacular del año. El cafetero sorprendió con un tiro libre desde 35 metros directo al ángulo superior en Anfield. Este golazo empata para Liverpool y mantiene vivas las esperanzas de la hinchada latina en Europa. ¿El mejor gol de un colombiano en Europa? Comenta tu opinión ⚽"
 
 REGLAS CRÍTICAS - CUMPLIMIENTO 100%:
+• CONTEO EXACTO: 75-80 palabras EXACTAS - ni una más, ni una menos
+• TIMING ESTRICTO: Máximo 20 segundos = 4 palabras por segundo promedio
+• FIDELIDAD ABSOLUTA: Solo datos de la base - PROHIBIDO inventar
+• ESTRUCTURA RÍGIDA: Hook + Core + CTA obligatorio
+• EMOCIÓN MÁXIMA: Usa exclamaciones, superlativos y palabras de impacto
 
-VERIFICACIÓN OBLIGATORIA: Antes de responder, SIEMPRE consultar "basededatos" - CERO excepciones
-CONTEO EXACTO: Contar palabras manualmente - objetivo 75-80 palabras máximo
-TIMING ESTRICTO: Máximo 20 segundos = 4 palabras por segundo promedio
-FIDELIDAD ABSOLUTA: Solo datos de la base - PROHIBIDO inventar o asumir
-ESTRUCTURA RÍGIDA: Hook + Core + CTA - sin variaciones
-COMPLETITUD: Incluir TODOS los detalles importantes de la noticia original
+CONSULTA DEL USUARIO: ${consulta}
 
-CONSULTA: ${consulta}
+INFORMACIÓN DISPONIBLE EN BASE DE DATOS:
+${contextoRAG.substring(0, 2000)}
 
-DATOS DISPONIBLES:
-${contextoRAG.substring(0, 1500)}
+RESPONDE ÚNICAMENTE EL SCRIPT FINAL de 75-80 palabras siguiendo la estructura Hook-Core-CTA:`;
 
-RESPONDE SOLO EL SCRIPT:`;
-
-    // PASO 4: Llamar a OpenAI
-    console.log(`🤖 [${sessionId}] Enviando a GPT-4...`);
+    // PASO 4: Llamar a OpenAI con configuración optimizada
+    console.log(`🤖 [${sessionId}] Enviando a GPT con prompt original...`);
     
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'Eres presentadora de noticias deportivas. Genera scripts de 75-80 palabras exactas.'
+          content: 'Eres una presentadora de noticias deportivas MUY ALEGRE y EMOTIVA. Creas scripts de EXACTAMENTE 75-80 palabras con máxima emoción y estructura Hook-Core-CTA. NUNCA superes las 80 palabras.'
         },
         {
           role: 'user',
-          content: promptOptimizado
+          content: promptOriginalOptimizado
         }
       ],
-      max_tokens: 200,
-      temperature: 0.7
+      max_tokens: 150,
+      temperature: 0.8,
+      presence_penalty: 0.3,
+      frequency_penalty: 0.2
     });
 
     const script = response.choices[0].message.content.trim();
-    const palabras = script.split(' ').length;
+    const palabras = script.split(' ').filter(word => word.length > 0).length;
     
     console.log(`✅ [${sessionId}] Script generado: ${palabras} palabras`);
     console.log(`📝 [${sessionId}] Preview: "${script.substring(0, 100)}..."`);
+
+    // Validar si cumple los requisitos
+    if (palabras > 85) {
+      console.log(`⚠️ [${sessionId}] Script muy largo (${palabras} palabras), reintentando...`);
+      // Reintentar con prompt más estricto
+      const scriptCorto = await generarScriptCorto(contextoRAG, consulta, sessionId);
+      return scriptCorto;
+    }
 
     return {
       script: script,
@@ -178,11 +189,67 @@ RESPONDE SOLO EL SCRIPT:`;
   } catch (error) {
     console.error(`❌ [${sessionId}] Error IA:`, error.message);
     
-    // Fallback a script básico
+    // Fallback a script básico pero emotivo
     return {
-      script: `¡INCREÍBLE! Últimas noticias sobre ${consulta}. Los equipos están realizando movimientos estratégicos que mantienen a toda la hinchada expectante. Esta información promete marcar un antes y después en la temporada actual. ¿Qué opinas de estos desarrollos? ⚽`,
+      script: `¡BOMBAZO! Últimas noticias sobre ${consulta} que están revolucionando el mundo del fútbol. Los equipos top están realizando movimientos estratégicos que mantienen a toda la hinchada expectante. Esta información promete marcar un antes y después en la temporada. ¿Qué opinas de estos desarrollos? ⚽`,
       encontrado: false,
       palabras: 48,
+      error: error.message
+    };
+  }
+}
+
+// Función auxiliar para scripts que salen muy largos
+async function generarScriptCorto(contextoRAG, consulta, sessionId) {
+  try {
+    const promptCorto = `CREAR SCRIPT DE MÁXIMO 75 PALABRAS:
+
+ESTRUCTURA OBLIGATORIA:
+1. HOOK emotivo (15 palabras): ¡INCREÍBLE! / ¡BOMBAZO! / ¡HISTÓRICO!
+2. CORE informativo (50 palabras): Datos específicos de la noticia
+3. CTA pregunta (10 palabras): Pregunta + emoji
+
+DATOS:
+${contextoRAG.substring(0, 1000)}
+
+CONSULTA: ${consulta}
+
+SCRIPT FINAL (máximo 75 palabras):`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres presentadora deportiva. Crea scripts de MÁXIMO 75 palabras con estructura Hook-Core-CTA.'
+        },
+        {
+          role: 'user',
+          content: promptCorto
+        }
+      ],
+      max_tokens: 120,
+      temperature: 0.7
+    });
+
+    const script = response.choices[0].message.content.trim();
+    const palabras = script.split(' ').filter(word => word.length > 0).length;
+    
+    console.log(`✅ [${sessionId}] Script corto generado: ${palabras} palabras`);
+
+    return {
+      script: script,
+      encontrado: true,
+      palabras: palabras,
+      version: 'corta'
+    };
+
+  } catch (error) {
+    console.error(`❌ [${sessionId}] Error en script corto:`, error.message);
+    return {
+      script: `¡INCREÍBLE! ${consulta} está dando de qué hablar en el mundo del fútbol. Los fanáticos no pueden creer lo que está sucediendo. ¿Tú qué opinas? ⚽`,
+      encontrado: false,
+      palabras: 27,
       error: error.message
     };
   }

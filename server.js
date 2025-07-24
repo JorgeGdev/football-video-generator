@@ -535,3 +535,68 @@ process.on('SIGINT', () => {
   
   process.exit(0);
 });
+
+// Endpoint para descargar videos
+app.get('/api/videos/download/:filename', requireAuth, (req, res) => {
+  try {
+    const { filename } = req.params;
+    const videoPath = path.join(__dirname, 'videos_finales', filename);
+    
+    // Verificar que el archivo existe
+    if (!fs.existsSync(videoPath)) {
+      return res.status(404).json({ success: false, message: 'Video no encontrado' });
+    }
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'video/mp4');
+    
+    // Enviar archivo
+    res.sendFile(videoPath);
+    
+    broadcastLog(`📥 Video descargado: ${filename} por ${req.user.username}`);
+    
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error descargando video' });
+  }
+});
+
+// Endpoint para listar videos disponibles
+app.get('/api/videos/list', requireAuth, (req, res) => {
+  try {
+    const videosDir = 'videos_finales';
+    
+    // Verificar que la carpeta existe
+    if (!fs.existsSync(videosDir)) {
+      return res.json({ success: true, videos: [] });
+    }
+    
+    // Leer archivos de video
+    const archivos = fs.readdirSync(videosDir)
+      .filter(file => file.endsWith('.mp4'))
+      .map(file => {
+        const filePath = path.join(videosDir, file);
+        const stats = fs.statSync(filePath);
+        const sizeInMB = (stats.size / (1024 * 1024)).toFixed(2);
+        
+        return {
+          nombre: file,
+          fecha: stats.mtime.toISOString().split('T')[0], // Solo fecha
+          hora: stats.mtime.toTimeString().split(' ')[0], // Solo hora
+          tamaño: sizeInMB + ' MB',
+          fechaCompleta: stats.mtime
+        };
+      })
+      .sort((a, b) => new Date(b.fechaCompleta) - new Date(a.fechaCompleta)); // Más recientes primero
+    
+    res.json({ 
+      success: true, 
+      videos: archivos,
+      total: archivos.length 
+    });
+    
+  } catch (error) {
+    console.error('Error listando videos:', error);
+    res.status(500).json({ success: false, message: 'Error listando videos' });
+  }
+});
