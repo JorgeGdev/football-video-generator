@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚽ Football Video Generator - Panel de Control</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- BOTÓN DE LOGOUT - NUEVO -->
+      <!-- BOTONES DE NAVEGACIÓN Y LOGOUT -->
+      <div
+        style="
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+          display: flex;
+          gap: 10px;
+        "
+      >
+        <button
+          class="btn"
+          onclick="window.location.href='/admin.html'"
+          style="
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+          "
+          id="adminBtn"
+        >
+          👑 Panel Admin
+        </button>
+        <button
+          class="btn danger"
+          onclick="logout()"
+          style="padding: 8px 15px; font-size: 0.9rem"
+        >
+          🚪 Cerrar Sesión
+        </button>
+      </div>
+      <div class="header">
+        <h1>⚽ Football Video Generator</h1>
+        <p>Sistema automático de generación de videos deportivos con IA</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="vectorCount">0</div>
+          <div class="stat-label">Vectores RAG</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="videosCount">0</div>
+          <div class="stat-label">Videos Generados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="successRate">0%</div>
+          <div class="stat-label">Éxito</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>📰 Actualización de Noticias</h3>
+          <div class="status idle" id="scraperStatus">Inactivo</div>
+          <p>
+            Ejecuta el scraper para obtener las últimas noticias deportivas de 4
+            países.
+          </p>
+          <button class="btn" onclick="ejecutarScraper()" id="scraperBtn">
+            🔄 Actualizar Noticias
+          </button>
+          <button class="btn clear-btn" onclick="limpiarLogs()">
+            🗑️ Limpiar Logs
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>🎬 Generación de Videos</h3>
+          <div class="status idle" id="botStatus">Bot Inactivo</div>
+          <p>Inicia el bot de Telegram para generar videos automáticamente.</p>
+          <button class="btn" onclick="iniciarBot()" id="botBtn">
+            🤖 Iniciar Bot
+          </button>
+          <button
+            class="btn danger"
+            onclick="detenerBot()"
+            id="stopBotBtn"
+            disabled
+          >
+            ⏹️ Detener Bot
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎯 Generar Video Manual</h3>
+        <div class="video-form">
+          <div class="form-group">
+            <label>Seleccionar Imagen:</label>
+            <select id="imagenSelect">
+              <option value="sofia1">Sofia 1</option>
+              <option value="sofia2">Sofia 2</option>
+              <option value="sofia3" selected>Sofia 3</option>
+              <option value="sofia4">Sofia 4</option>
+              <option value="sofia5">Sofia 5</option>
+              <option value="sofia6">Sofia 6</option>
+              <option value="sofia7">Sofia 7</option>
+              <option value="sofia8">Sofia 8</option>
+              <option value="sofia9">Sofia 9</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Consulta:</label>
+            <input
+              type="text"
+              id="consultaInput"
+              placeholder="Ej: noticias del Barcelona"
+            />
+          </div>
+          <button class="btn" onclick="generarVideoManual()" id="generateBtn">
+            🎬 Generar Script
+          </button>
+
+          <!-- Botones de aprobación (ocultos inicialmente) -->
+          <div class="approval-buttons" id="approvalButtons">
+            <button
+              class="btn approve"
+              onclick="aprobarScript()"
+              id="approveBtn"
+            >
+              ✅ APROBAR SCRIPT
+            </button>
+            <button
+              class="btn reject"
+              onclick="rechazarScript()"
+              id="rejectBtn"
+            >
+              ❌ RECHAZAR SCRIPT
+            </button>
+          </div>
+
+          <!-- Info de sesión -->
+          <div class="session-info" id="sessionInfo" style="display: none">
+            <strong>Sesión:</strong> <span id="currentSessionId"></span><br />
+            <strong>Estado:</strong>
+            <span id="sessionStatus">Esperando aprobación</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-container">
+        <h3 style="margin-bottom: 15px">
+          📋 Logs del Sistema
+          <button class="btn clear-btn" onclick="limpiarLogs()">
+            🗑️ Limpiar
+          </button>
+        </h3>
+        <div class="log-output" id="logOutput">
+          Sistema iniciado. Listo para ejecutar comandos...
+        </div>
+      </div>
+    </div>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

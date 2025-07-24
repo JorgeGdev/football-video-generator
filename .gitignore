@@ -1,0 +1,27 @@
+# === CLAVES SECRETAS ===
+.env
+.env.local
+.env.production
+
+# === NODE ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === ARCHIVOS GENERADOS ===
+videos_finales/
+audios_generados/
+*.log
+
+# === SISTEMA ===
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# === RAILWAY ===
+.railway/
+
+# === USUARIOS ===
+users.json

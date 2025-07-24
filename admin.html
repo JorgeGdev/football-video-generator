@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>👑 Admin Panel - Football Video Generator</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <style>
+      .admin-section {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .user-list {
+        display: grid;
+        gap: 15px;
+      }
+
+      .user-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-role {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-left: 10px;
+      }
+
+      .role-admin {
+        background: #ff9800;
+        color: white;
+      }
+
+      .role-user {
+        background: #4caf50;
+        color: white;
+      }
+
+      .create-user-form {
+        display: grid;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .logout-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #fff;
+        font-size: 1rem;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #87ceeb;
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 10px rgba(135, 206, 235, 0.3);
+      }
+
+      .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .form-group select option {
+        background: #1e3c72;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="logout-btn" onclick="logout()">🚪 Cerrar Sesión</button>
+
+    <div class="container">
+      <div class="header">
+        <h1>👑 Panel de Administración</h1>
+        <p>Sistema de gestión de usuarios</p>
+      </div>
+
+      <div class="admin-section">
+        <h3>📊 Información del Sistema</h3>
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-number" id="totalUsers">0</div>
+            <div class="stat-label">Usuarios Totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="activeUsers">0</div>
+            <div class="stat-label">Usuarios Activos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="adminUsers">0</div>
+            <div class="stat-label">Administradores</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3>👥 Gestión de Usuarios</h3>
+        <div class="user-list" id="userList">
+          <!-- Los usuarios se cargarán aquí -->
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3>➕ Crear Nuevo Usuario</h3>
+        <div class="create-user-form">
+          <div class="form-group">
+            <label for="newUsername">👤 Nombre de Usuario:</label>
+            <input
+              type="text"
+              id="newUsername"
+              placeholder="Ej: juan123"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newName">📝 Nombre Completo:</label>
+            <input
+              type="text"
+              id="newName"
+              placeholder="Ej: Juan Pérez"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newEmail">📧 Correo Electrónico:</label>
+            <input
+              type="email"
+              id="newEmail"
+              placeholder="Ej: juan@empresa.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">🔒 Contraseña:</label>
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newRole">🎭 Tipo de Usuario:</label>
+            <select id="newRole">
+              <option value="user">👨‍💼 Usuario Normal</option>
+              <option value="admin">👑 Administrador</option>
+            </select>
+          </div>
+
+          <button
+            class="btn"
+            onclick="createUser()"
+            style="width: 100%; margin-top: 20px; padding: 15px"
+          >
+            👤 Crear Usuario
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3>🎛️ Acciones Rápidas</h3>
+        <button class="btn" onclick="window.location.href='/'">
+          📋 Ir al Dashboard
+        </button>
+        <button class="btn danger" onclick="logout()">🚪 Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <script>
+      // Cargar usuarios al iniciar
+      window.onload = function () {
+        loadUsers();
+      };
+
+      async function loadUsers() {
+        try {
+          const response = await fetch("/api/auth/users", {
+            credentials: "include",
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            displayUsers(result.users);
+            updateStats(result.users);
+          } else {
+            alert("Error cargando usuarios: " + result.message);
+          }
+        } catch (error) {
+          alert("Error conectando con el servidor");
+        }
+      }
+
+      function displayUsers(users) {
+        const userList = document.getElementById("userList");
+        userList.innerHTML = "";
+
+        users.forEach((user) => {
+          const userItem = document.createElement("div");
+          userItem.className = "user-item";
+          userItem.innerHTML = `
+      <div class="user-info">
+        <strong>${user.name}</strong> (@${user.username})
+        <span class="user-role role-${
+          user.role
+        }">${user.role.toUpperCase()}</span>
+        <br>
+        <small>📧 ${user.email}</small><br>
+        <small>Creado: ${user.created} | Estado: ${
+            user.active ? "Activo" : "Inactivo"
+          }</small>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="resetPassword('${
+          user.username
+        }')" style="padding: 5px 10px; font-size: 0.8rem;">
+          🔑 Cambiar Contraseña
+        </button>
+      </div>
+    `;
+          userList.appendChild(userItem);
+        });
+      }
+
+      function updateStats(users) {
+        document.getElementById("totalUsers").textContent = users.length;
+        document.getElementById("activeUsers").textContent = users.filter(
+          (u) => u.active
+        ).length;
+        document.getElementById("adminUsers").textContent = users.filter(
+          (u) => u.role === "admin"
+        ).length;
+      }
+
+      async function createUser() {
+        const username = document.getElementById("newUsername").value;
+        const name = document.getElementById("newName").value;
+        const email = document.getElementById("newEmail").value; // NUEVO
+        const password = document.getElementById("newPassword").value;
+        const role = document.getElementById("newRole").value;
+
+        if (!username || !name || !email || !password) {
+          // AGREGAMOS EMAIL
+          alert("Por favor completa todos los campos");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/auth/create-user", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ username, name, email, password, role }), // AGREGAMOS EMAIL
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert("Usuario creado exitosamente");
+            // Limpiar formulario
+            document.getElementById("newUsername").value = "";
+            document.getElementById("newName").value = "";
+            document.getElementById("newEmail").value = ""; // NUEVO
+            document.getElementById("newPassword").value = "";
+            document.getElementById("newRole").value = "user";
+            // Recargar lista
+            loadUsers();
+          } else {
+            alert("Error: " + result.message);
+          }
+        } catch (error) {
+          alert("Error conectando con el servidor");
+        }
+      }
+
+      async function logout() {
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+          window.location.href = "/login.html";
+        } catch (error) {
+          window.location.href = "/login.html";
+        }
+      }
+      // VERIFICACIÓN DE SEGURIDAD CRÍTICA
+      async function verificarAdminAccess() {
+        try {
+          const response = await fetch("/api/auth/check", {
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            window.location.href = "/login.html";
+            return;
+          }
+
+          const result = await response.json();
+
+          if (!result.success) {
+            window.location.href = "/login.html";
+            return;
+          }
+
+          // CRÍTICO: Verificar que sea admin
+          if (result.user.role !== "admin") {
+            alert(
+              "⛔ ACCESO DENEGADO\n\nSolo los administradores pueden acceder a este panel."
+            );
+            window.location.href = "/";
+            return;
+          }
+
+          // Si llegó aquí, es admin válido
+          console.log("✅ Acceso admin autorizado:", result.user.username);
+        } catch (error) {
+          alert("Error de conexión");
+          window.location.href = "/login.html";
+        }
+      }
+
+      // EJECUTAR VERIFICACIÓN AL CARGAR LA PÁGINA
+      verificarAdminAccess();
+
+      // SOBRESCRIBIR LA FUNCIÓN window.onload EXISTENTE
+      const originalOnload = window.onload;
+      window.onload = function () {
+        verificarAdminAccess();
+        if (originalOnload) originalOnload();
+      };
+
+      // FUNCIÓN PARA CAMBIAR CONTRASEÑA DE USUARIO
+      async function resetPassword(username) {
+        const newPassword = prompt(
+          `Cambiar contraseña para: ${username}\n\nIngresa la nueva contraseña:`
+        );
+
+        if (!newPassword || newPassword.length < 6) {
+          alert("Contraseña debe tener mínimo 6 caracteres");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/auth/reset-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ username, newPassword }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert("✅ Contraseña cambiada exitosamente");
+          } else {
+            alert("❌ Error: " + result.message);
+          }
+        } catch (error) {
+          alert("Error de conexión");
+        }
+      }
+    </script>
+  </body>
+</html>
