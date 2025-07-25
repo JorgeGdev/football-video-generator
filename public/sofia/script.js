@@ -269,21 +269,9 @@ document.addEventListener("DOMContentLoaded", function () {
       dropdownMenu.className = "world-dropdown-menu";
       dropdownMenu.innerHTML = `
   <div class="world-dropdown-content">
-    <h3>Sofia's Digital World</h3>
+    <h3>Access Studio</h3>
     <a href="/studio" target="_self">
       <i class="fa fa-cogs"></i> Sofia's Studio
-    </a>
-    <a href="https://www.lacontrasports.com" target="_blank">
-      <i class="fa fa-futbol-o"></i> La Contra Sports
-    </a>
-    <a href="#!" target="_blank">
-      <i class="fa fa-instagram"></i> Instagram
-    </a>
-    <a href="#!" target="_blank">
-      <i class="fa fa-youtube-play"></i> YouTube Channel
-    </a>
-    <a href="#!" target="_blank">
-      <i class="fa fa-music"></i> TikTok Videos
     </a>
   </div>
 `;

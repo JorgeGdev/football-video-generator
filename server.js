@@ -461,8 +461,25 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/sofia/index.html'));
 });
 
-// Dashboard (antes era /)
-app.get('/studio', requireAuth, (req, res) => {
+// Dashboard - Redirigir a login si no está autenticado
+app.get('/studio', (req, res) => {
+  const token = req.cookies?.auth_token;
+  
+  if (!token) {
+    // No hay token, redirigir a login
+    return res.redirect('/login.html');
+  }
+  
+  // Verificar token
+  const { verificarToken } = require('./modules/auth-manager');
+  const verification = verificarToken(token);
+  
+  if (!verification.success) {
+    // Token inválido, redirigir a login
+    return res.redirect('/login.html');
+  }
+  
+  // Token válido, mostrar dashboard
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
