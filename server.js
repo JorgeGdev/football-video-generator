@@ -453,6 +453,19 @@ app.post('/api/logs/clear', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// Servir archivos estáticos de Sofia Portfolio
+app.use('/sofia', express.static(path.join(__dirname, 'public/sofia')));
+
+// Ruta principal - Sofia Portfolio Landing
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/sofia/index.html'));
+});
+
+// Dashboard (antes era /)
+app.get('/studio', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
 // Servir página de login
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
@@ -497,9 +510,9 @@ app.get('/admin.html', requireAuth, requireAdmin, (req, res) => {
 });
 
 // Servir dashboard (requiere autenticación)
-app.get('/', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
-});
+//app.get('/', requireAuth, (req, res) => {
+  //res.sendFile(path.join(__dirname, 'dashboard.html'));
+//});
 
 // Redirigir a login si no está autenticado
 app.use((err, req, res, next) => {

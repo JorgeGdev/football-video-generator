@@ -277,16 +277,16 @@ async function limpiarLogs() {
 }
 
 // ===== FUNCIÓN DE LOGOUT =====
+// ===== FUNCIÓN DE LOGOUT =====
 async function logout() {
   try {
     await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
     });
-    window.location.href = "/login.html";
+    window.location.href = "/"; // CAMBIO: Ahora regresa a Sofia
   } catch (error) {
-    // Si falla, redirigir de todas formas
-    window.location.href = "/login.html";
+    window.location.href = "/"; // CAMBIO: Ahora regresa a Sofia
   }
 }
 

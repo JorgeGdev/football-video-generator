@@ -255,8 +255,76 @@ SCRIPT FINAL (máximo 75 palabras):`;
   }
 }
 
+// Función para generar caption de redes sociales
+async function generarCaption(script, sessionId) {
+  try {
+    console.log(`📱 [${sessionId}] Generando caption para redes sociales...`);
+    
+    const captionPrompt = `Eres un experto en redes sociales deportivas. Crea un caption viral basado en este script de video:
+
+"${script}"
+
+REQUIREMENTS:
+- Hook inicial con emoji llamativo (🚨⚽🔥)
+- 2-3 líneas de contenido atractivo
+- Llamada a la acción al final
+- 8-10 hashtags relevantes
+- Máximo 150 caracteres total
+- Tono emocionante y viral
+
+EJEMPLO FORMATO:
+🚨 BOMBAZO EN EL BERNABÉU 🚨
+
+Mbappé anota su primer hat-trick como madridista y enloquece al Santiago Bernabéu. El francés demostró por qué es considerado el sucesor de Cristiano.
+
+¿Será el nuevo rey del Madrid? 👑
+
+#RealMadrid #Mbappe #HatTrick #Futbol #LaLiga #Bernabeu #Madrid #Gol #CR7
+
+GENERA SOLO EL CAPTION, SIN EXPLICACIONES:`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un experto en marketing deportivo y redes sociales. Generas captions virales para videos de fútbol.'
+        },
+        {
+          role: 'user',
+          content: captionPrompt
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.8
+    });
+
+    const caption = response.choices[0].message.content.trim();
+    
+    console.log(`✅ [${sessionId}] Caption generado: ${caption.length} caracteres`);
+    
+    return {
+      caption: caption,
+      caracteres: caption.length,
+      success: true
+    };
+
+  } catch (error) {
+    console.error(`❌ [${sessionId}] Error generando caption:`, error.message);
+    
+    // Fallback caption
+    return {
+      caption: `⚽ ¡Increíbles noticias del fútbol! \n\nNo te pierdas los momentos más emocionantes del deporte rey. \n\n¿Cuál es tu opinión? 🤔\n\n#Futbol #Deportes #Noticias #Gol #Football #Soccer #Sports`,
+      caracteres: 150,
+      success: false,
+      error: error.message
+    };
+  }
+}
+
 // Exportar funciones
 module.exports = {
   generarScript,
-  consultarRAG
+  consultarRAG,
+  generarCaption
 };
